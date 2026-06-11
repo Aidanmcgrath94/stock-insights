@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint with ruff
+        run: ruff check app/ tests/
+
+      # No API keys needed: every external dependency is faked in tests.
+      # If a test ever accidentally requires real settings, this fails loudly.
+      - name: Run tests
+        run: pytest --tb=short -q
+
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t stock-insights .
+
+      - name: Smoke test container
+        run: |
+          docker run -d -p 8000:8000 \
+            -e OPENAI_API_KEY=dummy -e FINNHUB_API_KEY=dummy \
+            --name smoke stock-insights
+          sleep 3
+          curl --fail http://localhost:8000/health
+          curl --fail -s http://localhost:8000/ | grep -q "Stock Insights"
+          docker stop smoke
