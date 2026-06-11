@@ -42,14 +42,16 @@ ChatGPT-style chat: your questions appear as right-aligned bubbles, the
 assistant answers on the left, and a sidebar offers suggested stock
 questions to get started (it collapses behind a toggle on small screens).
 Each answer has a collapsible "Details" section with the detected ticker
-symbols and the exact JSON returned by the API, I thought this would be
-useful for debugging.
+symbols and the exact JSON returned by the API. This is included to make
+debugging and review easier.
 
 Conversations are remembered for the session, so follow-ups like "what
 about its P/E?" work. "New chat" starts a fresh conversation; history
 lives in memory only and resets when the server restarts.
 
-I did not want to over complicate the front end so it is plain HTML/CSS/vanilla JS served by FastAPI itself from `app/static/` — no build step, no frontend dependencies.
+The frontend is intentionally plain HTML/CSS/vanilla JS served by FastAPI
+from `app/static/`, avoiding a separate build step or frontend dependency
+chain.
 
 Some questions to try:
 
@@ -111,10 +113,10 @@ User
              ├─ get_company_profile  │
              ├─ get_peers            ├─ MarketData (services/market_data.py)
              ├─ get_basic_financials │
-             └─ get_company_news ────┘──→ NewsSummarizer (agents/news_summarizer.py)
+             └─ get_company_news ────┘──→ News summarizer (agents/news_summarizer.py)
 ```
 
-This is a genuine agentic loop: the model receives tool definitions, decides
+This is a tool-calling loop: the model receives tool definitions, decides
 which tools to call and with what arguments, results are fed back, and it
 keeps going until it has enough data to answer (bounded by `MAX_TOOL_ROUNDS`).
 Tool calls within a round run concurrently. Tool errors, unknown tickers and
@@ -127,7 +129,7 @@ can answer from whatever data it did get, instead of the API erroring out.
 flowchart TD
     Q["User question"] --> L["Send conversation +<br/>tool definitions to the model"]
     L --> D{"Model requested<br/>tool calls?"}
-    D -- "no — it answered" --> V["LLM critic: claims grounded<br/>in fetched data? (advisory)"]
+    D -- "no — it answered" --> V["Grounding check: claims supported<br/>by fetched data? (advisory)"]
     V --> R["Return answer +<br/>record of tool calls"]
     D -- yes --> E["Execute tool calls concurrently<br/>(errors become results,<br/>news goes via summarizer)"]
     E --> F["Feed results back<br/>into the conversation"]
@@ -138,15 +140,16 @@ flowchart TD
 
 Two supporting components:
 
-- **NewsSummarizer subagent** — company news is noisy (8 articles of headlines
+- **News summarizer** — company news is noisy (8 articles of headlines
   and blurbs). A cheap LLM call condenses them to 2-3 sentences before they
-  enter the main agent's context, controlling token bloat. If summarization
+  enter the main model's context, controlling token bloat. If summarization
   fails it degrades to raw headlines rather than failing the tool.
-- **LLM answer critic** (`agents/critic.py`) — after the final answer, a
-  second model call checks every claim against the data the tools returned:
-  wrong numbers, tickers that were never fetched, unsupported causal claims.
-  Ungrounded answers are logged as warnings. Advisory and fail-open — a
-  critic outage never blocks an answer, and it is skipped when no tools ran.
+- **Answer grounding check** (`agents/critic.py`) — after the final answer,
+  a second model call checks every claim against the data the tools
+  returned: wrong numbers, tickers that were never fetched, unsupported
+  causal claims. Ungrounded answers are logged as warnings. Non-blocking
+  and advisory — a failure in the check never blocks an answer, and it is
+  skipped when no tools ran.
 
 **Key design choices:**
 
@@ -209,7 +212,7 @@ ruff check app/ tests/
 |----------|-----------|
 | LLM tool-calling over regex routing | The model resolves any company name and decides what data it needs. Costs ~3-4 LLM calls per query instead of 1; bounded by `MAX_TOOL_ROUNDS`. |
 | Tool errors fed back to the model | An unknown ticker or one timed-out fetch becomes part of the answer instead of failing the request. OpenAI outages still return 502. |
-| LLM critic over a deterministic verifier | A second model call checks the whole answer semantically — misattributed tickers and unsupported claims, not just dollar figures a regex could match. Costs one extra call per answer; advisory and fail-open, so a critic outage never blocks a response. |
+| Model-based grounding check over a regex verifier | A second model call checks the whole answer semantically — misattributed tickers and unsupported claims, not just dollar figures a regex could match. Costs one extra call per answer; non-blocking and advisory, so a failure in the check never blocks a response. |
 | In-memory conversation store | Follow-ups ("what about its P/E?") need referents, not persistence. A capped dict does it in ~50 lines; history resets on restart by design. Only the conversation text is replayed — old tool data is never reused, so prices stay fresh. |
 | No caching | Adds complexity; a Redis layer is a straightforward future addition. |
 | No auth | Out of scope for a take-home prototype. Add an API-key header or OAuth when needed. |
@@ -234,7 +237,7 @@ ruff check app/ tests/
 **In the app:**
 
 - **OpenAI `gpt-4o-mini`** powers the agent loop (tool selection + final
-  answers), the news summarizer subagent, and the answer critic. Prompts pin
+  answers), the news summarizer, and the answer grounding check. Prompts pin
   the model to fetched data, forbid buy/sell recommendations, and require
   plain text.
 
