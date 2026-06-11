@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stock Insights Assistant</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <aside id="sidebar">
+    <h1>Stock Insights Assistant</h1>
+    <p class="tagline">Ask about stocks in plain English.</p>
+
+    <h2>Suggested questions</h2>
+    <nav class="suggestions">
+      <button type="button" class="suggestion">Is AMD up or down today?</button>
+      <button type="button" class="suggestion">Give me a quick overview of Netflix</button>
+      <button type="button" class="suggestion">Compare JPM and Goldman Sachs</button>
+      <button type="button" class="suggestion">Compare Intel to its competitors</button>
+      <button type="button" class="suggestion">How is Spotify performing today?</button>
+      <button type="button" class="suggestion">Tell me about Berkshire Hathaway</button>
+      <button type="button" class="suggestion">What is happening with Palantir stock?</button>
+      <button type="button" class="suggestion">Compare Uber and Lyft</button>
+    </nav>
+
+    <button id="new-chat" type="button">New chat</button>
+
+    <p class="disclaimer">For research only. Not financial advice.</p>
+  </aside>
+
+  <main>
+    <button id="sidebar-toggle" type="button" aria-label="Toggle sidebar">☰</button>
+
+    <div id="messages">
+      <div id="welcome">
+        <p class="welcome-title">Stock Insights Assistant</p>
+        <p class="welcome-subtitle">Ask plain-English questions about prices,
+        comparisons, company profiles, and recent market movement.</p>
+
+        <div class="welcome-chips">
+          <button type="button" class="suggestion">How did MSFT move today?</button>
+          <button type="button" class="suggestion">Compare AMZN and GOOGL</button>
+          <button type="button" class="suggestion">What is Meta's market cap?</button>
+          <button type="button" class="suggestion">Summarise Nvidia's recent performance</button>
+          <button type="button" class="suggestion">Does Coca-Cola pay a dividend?</button>
+          <button type="button" class="suggestion">Compare Visa and Mastercard</button>
+        </div>
+
+        <p class="welcome-disclaimer">For research only. Not financial advice.</p>
+      </div>
+    </div>
+
+    <footer class="composer">
+      <form id="ask-form">
+        <textarea
+          id="query"
+          rows="1"
+          placeholder="Ask about a stock…"
+          maxlength="500"
+          required
+        ></textarea>
+        <button id="submit" type="submit">Send</button>
+      </form>
+    </footer>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,383 @@
+/* Design tokens */
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #2563eb;
+  --accent-dark: #1e50c8;
+  --accent-soft: #eff6ff;
+  --error: #b91c1c;
+  --error-bg: #fef2f2;
+  --column: 840px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* --- sidebar ------------------------------------------------------------ */
+
+#sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  padding: 1.75rem 1.4rem;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+#sidebar h1 {
+  font-size: 1.05rem;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.tagline {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0.2rem 0 2rem;
+}
+
+#sidebar h2 {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 0.6rem;
+}
+
+.suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.suggestions .suggestion {
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  color: var(--text);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  cursor: pointer;
+}
+
+.suggestions .suggestion:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+
+#new-chat {
+  margin-top: auto;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  cursor: pointer;
+}
+
+#new-chat:hover {
+  background: #dbeafe;
+}
+
+.disclaimer {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin: 1rem 0 0;
+}
+
+/* --- chat column ---------------------------------------------------------- */
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+#sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 20;
+  font: inherit;
+  font-size: 1.05rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+}
+
+/* --- messages --------------------------------------------------------------- */
+
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+#welcome {
+  margin: auto;
+  width: 100%;
+  max-width: 640px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 6px 16px rgba(0, 0, 0, 0.04);
+  padding: 2.5rem 2.25rem 1.75rem;
+}
+
+.welcome-title {
+  font-size: 1.3rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.4rem;
+}
+
+.welcome-subtitle {
+  color: var(--muted);
+  font-size: 0.92rem;
+  max-width: 460px;
+  margin: 0 auto 1.6rem;
+}
+
+.welcome-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+#welcome .suggestion {
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  cursor: pointer;
+}
+
+#welcome .suggestion:hover {
+  border-color: var(--accent);
+}
+
+.welcome-disclaimer {
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin: 1.75rem 0 0;
+}
+
+/* Each message: a centered column-width row holding a label + bubble */
+.row {
+  width: 100%;
+  max-width: var(--column);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.row.user {
+  align-items: flex-end;
+}
+
+.meta {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0 0.25rem 0.25rem;
+}
+
+.bubble {
+  max-width: 70%;
+  padding: 0.7rem 1rem;
+  border-radius: 18px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.row.user .bubble {
+  background: var(--accent);
+  color: #fff;
+  border-bottom-right-radius: 6px;
+}
+
+.row.assistant .bubble {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 6px;
+}
+
+.row.error .bubble {
+  background: var(--error-bg);
+  border: 1px solid #fecaca;
+  color: var(--error);
+  border-bottom-left-radius: 6px;
+}
+
+.row.loading .bubble {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* --- details inside an assistant bubble --------------------------------------- */
+
+.bubble details {
+  margin-top: 0.55rem;
+}
+
+.bubble summary {
+  font-size: 0.75rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.bubble summary:hover {
+  color: var(--text);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.5rem 0;
+}
+
+.chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 0.12rem 0.55rem;
+}
+
+.bubble pre {
+  margin: 0;
+  padding: 0.7rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: var(--bg);
+  border-radius: 8px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* --- composer -------------------------------------------------------------------- */
+
+.composer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 0.9rem 1.25rem 1.1rem;
+}
+
+#ask-form {
+  max-width: var(--column);
+  margin: 0 auto;
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-end;
+}
+
+#query {
+  flex: 1;
+  font: inherit;
+  color: inherit;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  resize: none;
+  max-height: 8rem;
+}
+
+#query:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-color: transparent;
+}
+
+#submit {
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 12px;
+  padding: 0.65rem 1.4rem;
+  cursor: pointer;
+}
+
+#submit:hover {
+  background: var(--accent-dark);
+}
+
+#submit:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+/* --- small screens: collapsible sidebar ------------------------------------ */
+
+@media (max-width: 760px) {
+  #sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 10;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+  }
+
+  #sidebar.open {
+    transform: translateX(0);
+  }
+
+  #sidebar-toggle {
+    display: block;
+  }
+
+  #messages {
+    padding-top: 3.25rem;
+  }
+
+  .bubble {
+    max-width: 85%;
+  }
+}
