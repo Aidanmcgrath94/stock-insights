@@ -55,12 +55,12 @@ chain.
 
 Some questions to try:
 
-- "How is AAPL doing today?"
-- "Compare TSLA and F"
-- "Tell me about Apple"
-- "Why is Tesla stock moving this week?"
-- "Is NVDA expensive right now?"
-- "Compare AAPL to its competitors"
+- "How did MSFT move today?"
+- "Compare AMZN and GOOGL"
+- "Give me a quick overview of Netflix"
+- "What is happening with Palantir stock?"
+- "Does Coca-Cola pay a dividend?"
+- "Compare Intel to its competitors"
 
 ## Endpoints
 
@@ -164,7 +164,7 @@ Two supporting components:
 - **Thin orchestrator** — runs the agent and translates failures into
   `UpstreamError`/`OrchestratorError`, keeping `main.py` clean.
 
----
+
 ## Logging
 
 Every request gets a short correlation ID, included in each log line and
@@ -204,7 +204,7 @@ logic against stubbed HTTP responses via `httpx.MockTransport`.
 ruff check app/ tests/
 ```
 
----
+
 
 ## Trade-offs
 
