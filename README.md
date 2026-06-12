@@ -214,15 +214,37 @@ ruff check app/ tests/
 | Tool errors fed back to the model | An unknown ticker or one timed-out fetch becomes part of the answer instead of failing the request. OpenAI outages still return 502. |
 | Model-based grounding check over a regex verifier | A second model call checks the whole answer semantically — misattributed tickers and unsupported claims, not just dollar figures a regex could match. Costs one extra call per answer; non-blocking and advisory, so a failure in the check never blocks a response. |
 | In-memory conversation store | Follow-ups ("what about its P/E?") need referents, not persistence. A capped dict does it in ~50 lines; history resets on restart by design. Only the conversation text is replayed — old tool data is never reused, so prices stay fresh. |
-| No caching | Adds complexity; a Redis layer is a straightforward future addition. |
+| No caching | Adds complexity; see "Data persistence and caching" below for how I would add it. |
 | No auth | Out of scope for a take-home prototype. Add an API-key header or OAuth when needed. |
 | `gpt-4o-mini` default | Good balance of cost and quality for short summaries and reliable tool selection. |
+
+### Data persistence and caching
+
+The current implementation fetches market data live from Finnhub and passes
+normalized results into the assistant. I intentionally kept the first
+version stateless to avoid adding database setup and migration complexity
+to a 5-hour take-home.
+
+In a production/internal-tools version, I would add a small persisted quote
+snapshot store. Each fetched quote would be normalized and stored with
+`symbol`, `provider`, `fetched_at`, `price`, `change`, `percent_change`,
+`day_high`, `day_low`, and `volume`.
+
+That would allow the app to:
+
+- reduce external API calls with a freshness policy
+- fall back to the latest cached quote if Finnhub is unavailable
+- support simple historical comparisons
+- provide a foundation for broader analytical queries such as "top movers in tech"
+
+I would start with a lightweight SQLite/Postgres table rather than
+introducing a full pipeline orchestrator, keeping the architecture simple
+while making the system more robust.
 
 ---
 
 ## Future improvements
 
-- **Caching** — Redis or an in-process TTL cache to avoid redundant Finnhub calls.
 - **Rate limiting** — per-IP throttling with `slowapi`.
 - **More tools** — historical price charts, earnings calendar, insider transactions.
 - **Streaming responses** — `text/event-stream` for perceived latency improvement.
